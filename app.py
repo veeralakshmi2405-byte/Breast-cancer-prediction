@@ -3,10 +3,18 @@
 import streamlit as st
 import pickle
 import numpy as np
+import os
+
+# Get current directory (safe for deployment)
+BASE_DIR = os.path.dirname(__file__)
 
 # Load the model and scaler
-model = pickle.load(open("model.pkl", "rb"))
-scaler = pickle.load(open("scaler.pkl", "rb"))
+with open(os.path.join(BASE_DIR, "breast_cancer_model.pkl"), "rb") as f:
+    model = pickle.load(f)
+
+with open(os.path.join(BASE_DIR, "scaler.pkl"), "rb") as f:
+    scaler = pickle.load(f)
+
 
 def predict_breast_cancer(input_features):
     """
@@ -19,12 +27,12 @@ def predict_breast_cancer(input_features):
     prob = model.predict_proba(arr_scaled)[0]
     return pred, prob
 
+
 def main():
-    st.title("Breast Cancer Prediction App")
+    st.title("🩺 Breast Cancer Prediction App")
+    st.write("Enter the tumor cell measurements to predict whether it's **Benign** or **Malignant**.")
 
-    st.write("Enter the measurements of tumor cells to predict whether it's Benign or Malignant.")
-
-    # Assume 30 features from breast cancer dataset
+    # Feature names (30 from sklearn breast cancer dataset)
     feature_names = [
         "radius_mean", "texture_mean", "perimeter_mean", "area_mean", "smoothness_mean",
         "compactness_mean", "concavity_mean", "concave_points_mean", "symmetry_mean",
@@ -43,13 +51,15 @@ def main():
 
     if st.button("Predict"):
         pred, prob = predict_breast_cancer(inputs)
-        if pred == 1:
-            st.success("Prediction: **Benign** ✅")
-        else:
-            st.error("Prediction: **Malignant** ⚠️")
 
-        st.write(f"Probability Benign: {prob[1]:.4f}")
-        st.write(f"Probability Malignant: {prob[0]:.4f}")
+        if pred == 1:
+            st.success("✅ Prediction: **Benign**")
+        else:
+            st.error("⚠️ Prediction: **Malignant**")
+
+        st.write(f"**Probability Benign:** {prob[1]:.4f}")
+        st.write(f"**Probability Malignant:** {prob[0]:.4f}")
+
 
 if __name__ == "__main__":
     main()
